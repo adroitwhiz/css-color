@@ -33,13 +33,17 @@ const benchHex = () => {
     // Warm up
     global.gc();
     for (let i = 0; i < hexColors.length; i++) {
-        out1.push(parseCSSColorFast(hexColors[i]));
+        parseCSSColorFast(hexColors[i], (model, c1, c2, c3, a) => {
+            out1.push([c1, c2, c3, a]);
+        });
     }
     out1 = [];
     global.gc();
     console.time('Hex (parseCSSColorFast)');
     for (let i = 0; i < hexColors.length; i++) {
-        out1.push(parseCSSColorFast(hexColors[i]));
+        parseCSSColorFast(hexColors[i], (model, c1, c2, c3, a) => {
+            out1.push([c1, c2, c3, a]);
+        });
     }
     console.timeEnd('Hex (parseCSSColorFast)');
 
@@ -117,13 +121,17 @@ const benchRgba = () => {
     // Warm up
     global.gc();
     for (let i = 0; i < rgbaColors.length; i++) {
-        out1.push(parseCSSColorFast(rgbaColors[i]));
+        parseCSSColorFast(rgbaColors[i], (model, c1, c2, c3, a) => {
+            out1.push([c1, c2, c3, a]);
+        });
     }
     out1 = [];
     global.gc();
     console.time('rgba (parseCSSColorFast)');
     for (let i = 0; i < rgbaColors.length; i++) {
-        out1.push(parseCSSColorFast(rgbaColors[i]));
+        parseCSSColorFast(rgbaColors[i], (model, c1, c2, c3, a) => {
+            out1.push([c1, c2, c3, a]);
+        });
     }
     console.timeEnd('rgba (parseCSSColorFast)');
 
@@ -202,13 +210,17 @@ const benchHsla = () => {
     // Warm up
     global.gc();
     for (let i = 0; i < colors.length; i++) {
-        out1.push(parseCSSColorFast(colors[i]));
+        parseCSSColorFast(colors[i], (model, c1, c2, c3, a) => {
+            out1.push([c1, c2, c3, a]);
+        });
     }
     out1 = [];
     global.gc();
     console.time('hsla (parseCSSColorFast)');
     for (let i = 0; i < colors.length; i++) {
-        out1.push(parseCSSColorFast(colors[i]));
+        parseCSSColorFast(colors[i], (model, c1, c2, c3, a) => {
+            out1.push([c1, c2, c3, a]);
+        });
     }
     console.timeEnd('hsla (parseCSSColorFast)');
 
@@ -269,13 +281,17 @@ const benchHwb = () => {
     // Warm up
     global.gc();
     for (let i = 0; i < colors.length; i++) {
-        out1.push(parseCSSColorFast(colors[i]));
+        parseCSSColorFast(colors[i], (model, c1, c2, c3, a) => {
+            out1.push([c1, c2, c3, a]);
+        });
     }
     out1 = [];
     global.gc();
     console.time('hwb (parseCSSColorFast)');
     for (let i = 0; i < colors.length; i++) {
-        out1.push(parseCSSColorFast(colors[i]));
+        parseCSSColorFast(colors[i], (model, c1, c2, c3, a) => {
+            out1.push([c1, c2, c3, a]);
+        });
     }
     console.timeEnd('hwb (parseCSSColorFast)');
 
@@ -340,13 +356,17 @@ const benchKeywords = () => {
     // Warm up
     global.gc();
     for (let i = 0; i < colors.length; i++) {
-        out1.push(parseCSSColorFast(colors[i]));
+        parseCSSColorFast(colors[i], (model, c1, c2, c3, a) => {
+            out1.push([c1, c2, c3, a]);
+        });
     }
     out1 = [];
     global.gc();
     console.time('keywords (parseCSSColorFast)');
     for (let i = 0; i < colors.length; i++) {
-        out1.push(parseCSSColorFast(colors[i]));
+        parseCSSColorFast(colors[i], (model, c1, c2, c3, a) => {
+            out1.push([c1, c2, c3, a]);
+        });
     }
     console.timeEnd('keywords (parseCSSColorFast)');
 

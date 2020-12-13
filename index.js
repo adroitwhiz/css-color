@@ -2,7 +2,7 @@ const colorNames = require('./color-names');
 
 const {rgbParser, hslParser, hwbParser, labParser, lchParser, deviceCmykParser} = require('./generated-parsers');
 
-const parseCSSColor = cssStr => {
+const parseCSSColor = (cssStr, cb) => {
     const str = cssStr.trim();
 
     // Hex
@@ -52,9 +52,9 @@ const parseCSSColor = cssStr => {
                 break;
 
             default:
-                return null;
+                return cb(null);
         }
-        return {model: 'rgb', value: [r, g, b, a / 255]};
+        return cb('rgb', r, g, b, a / 255);
     }
 
     const percentageToUint8 = percentage => {
@@ -83,7 +83,7 @@ const parseCSSColor = cssStr => {
 
     let parseResult, pathMap;
 
-    if (parseResult === null) return null;
+    if (parseResult === null) return cb(null);
 
     const parseDecimalOrPercentage = val => {
         if (val.charAt(val.length - 1) === '%') {
@@ -132,7 +132,7 @@ const parseCSSColor = cssStr => {
     if (/^rgb/i.test(str)) {
         parseResult = rgbParser.fastRegex.exec(str);
         if (parseResult === null) parseResult = rgbParser.regex.exec(str);
-        if (parseResult === null) return null;
+        if (parseResult === null) return cb(null);
         pathMap = rgbParser.pathMap;
 
         let r, g, b;
@@ -149,16 +149,16 @@ const parseCSSColor = cssStr => {
             g = floatToUint8(parseResult[pathMap[`${pathStart}.green`]]);
             b = floatToUint8(parseResult[pathMap[`${pathStart}.blue`]]);
         } else {
-            return null;
+            return cb(null);
         }
 
         const a = parseAlphaValue(pathStart);
 
-        return {model: 'rgb', value: [r, g, b, a]};
+        return cb('rgb', r, g, b, a);
     } else if (/^hsl/i.test(str)) {
         parseResult = hslParser.fastRegex.exec(str);
         if (parseResult === null) parseResult = hslParser.regex.exec(str);
-        if (parseResult === null) return null;
+        if (parseResult === null) return cb(null);
 
         pathMap = hslParser.pathMap;
 
@@ -168,11 +168,11 @@ const parseCSSColor = cssStr => {
         const l = percentageToNumber(parseResult[pathMap[`${pathStart}.lightness`]]);
         const a = parseAlphaValue(pathStart);
 
-        return {model: 'hsl', value: [h, s, l, a]};
+        return cb('hsl', h, s, l, a);
     } else if (/^hwb/i.test(str)) {
         parseResult = hwbParser.fastRegex.exec(str);
         if (parseResult === null) parseResult = hwbParser.regex.exec(str);
-        if (parseResult === null) return null;
+        if (parseResult === null) return cb(null);
 
         pathMap = hwbParser.pathMap;
 
@@ -181,11 +181,11 @@ const parseCSSColor = cssStr => {
         const b = percentageToNumber(parseResult[pathMap['hwb.blackness']]);
         const a = parseAlphaValue('hwb');
 
-        return {model: 'hwb', value: [h, w, b, a]};
+        return cb('hwb', h, w, b, a);
     } else if (/^lab/i.test(str)) {
         parseResult = labParser.fastRegex.exec(str);
         if (parseResult === null) parseResult = labParser.regex.exec(str);
-        if (parseResult === null) return null;
+        if (parseResult === null) return cb(null);
 
         pathMap = labParser.pathMap;
 
@@ -195,11 +195,11 @@ const parseCSSColor = cssStr => {
         const b = Number(parseResult[pathMap['lab.b']]);
         const alpha = parseAlphaValue('lab');
 
-        return {model: 'lab', value: [l, a, b, alpha]};
+        return cb('lab', l, a, b, alpha);
     } else if (/^lch/i.test(str)) {
         parseResult = lchParser.fastRegex.exec(str);
         if (parseResult === null) parseResult = lchParser.regex.exec(str);
-        if (parseResult === null) return null;
+        if (parseResult === null) return cb(null);
 
         pathMap = lchParser.pathMap;
 
@@ -208,11 +208,11 @@ const parseCSSColor = cssStr => {
         const h = parseHueValue('lch.hue');
         const alpha = parseAlphaValue('lch');
 
-        return {model: 'lch', value: [l, c, h, alpha]};
+        return cb('lch', l, c, h, alpha);
     } else if (/^device-cmyk/i.test(str)) {
         parseResult = deviceCmykParser.fastRegex.exec(str);
         if (parseResult === null) parseResult = deviceCmykParser.regex.exec(str);
-        if (parseResult === null) return null;
+        if (parseResult === null) return cb(null);
 
         pathMap = deviceCmykParser.pathMap;
 
@@ -223,14 +223,14 @@ const parseCSSColor = cssStr => {
         const alpha = parseAlphaValue('deviceCmyk');
         const fallback = parseResult[pathMap['deviceCmyk.fallback']] || null;
 
-        return {model: 'device-cmyk', value: [c, m, y, k, alpha, fallback]};
+        return cb('device-cmyk', c, m, y, k, alpha, fallback);
     }
 
     let colorKeywordValue = colorNames[str];
     if (!colorKeywordValue) colorKeywordValue = colorNames[str.toLowerCase()];
-    if (colorKeywordValue) return {model: 'rgb', value: colorKeywordValue.slice(0)};
+    if (colorKeywordValue) return cb('rgb', ...colorKeywordValue);
 
-    return null;
+    return cb(null);
 };
 
 module.exports = parseCSSColor;
