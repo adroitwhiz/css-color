@@ -2,11 +2,33 @@ const colorNames = require('./color-names');
 
 const {rgbParser, hslParser, hwbParser, labParser, lchParser, deviceCmykParser} = require('./generated-parsers');
 
-const parseCSSColor = (cssStr, cb) => {
+/**
+ * @callback cssParseCallback
+ * @param {('rgb'|'hsl'|'hwb'|'lab'|'lch'|'device-cmyk'|null)} type the type of parsed CSS color, or null if it could
+ * not be parsed
+ * @param {...number} componentValues The color component values. For RGB, these are numbers (not necessarily integers)
+ * from 0 to 255. For HSL and HWB, the first component (hue) is a number from 0 to 360, and the next two are numbers
+ * from 0 to 100. For LAB, the first component (lightness) is a number from 0 to +Infinity, with 100 representing white.
+ * The next two components are unbounded numbers. For LCH, the first component is the same as LAB's. The second
+ * component (chroma) is a number from 0 to +Infinity. The third component (hue) is a number from 0 to 360.
+ * For device-cmyk, the first 4 components are numbers from 0 to 100.
+ * @param {number} alpha The alpha, or opacity, of the color. This is a decimal value ranging from 0 to 1.
+ * @param {string?} fallback For device-cmyk, this is the non-parsed value of the fallback color, or null if one was not
+ * given. It may itself be passed into `parseCSSColor`.
+ */
+
+/**
+ * Parse a CSS color string, passing the result to the given callback function.
+ * @param {cssParseCallback} cb The function to pass the parsed color to.
+ * @param {string} cssStr The CSS color string to be parsed.
+ * @returns The return value of the passed callback `cb`.
+ */
+const parseCSSColor = (cb, cssStr) => {
     const str = cssStr.trim();
 
     // Hex
     if (/^#[0-9a-fA-F]+$/.test(str)) {
+        // We need the above regex because parseInt ignores weird invalid characters when parsing hex
         const colorNum = parseInt(str.slice(1), 16);
         let r, g, b, a;
         switch (str.length) {
@@ -83,8 +105,6 @@ const parseCSSColor = (cssStr, cb) => {
 
     let parseResult, pathMap;
 
-    if (parseResult === null) return cb(null);
-
     const parseDecimalOrPercentage = val => {
         if (val.charAt(val.length - 1) === '%') {
             return percentageToDecimal(val);
@@ -129,6 +149,7 @@ const parseCSSColor = (cssStr, cb) => {
         return ((h % 360) + 360) % 360;
     };
 
+    // Regex-based parsing
     if (/^rgb/i.test(str)) {
         parseResult = rgbParser.fastRegex.exec(str);
         if (parseResult === null) parseResult = rgbParser.regex.exec(str);
@@ -226,6 +247,7 @@ const parseCSSColor = (cssStr, cb) => {
         return cb('device-cmyk', c, m, y, k, alpha, fallback);
     }
 
+    // Color keyword parsing/lookup
     let colorKeywordValue = colorNames[str];
     if (!colorKeywordValue) colorKeywordValue = colorNames[str.toLowerCase()];
     if (colorKeywordValue) return cb('rgb', ...colorKeywordValue);

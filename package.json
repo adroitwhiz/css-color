@@ -2,19 +2,21 @@
   "name": "css-color-parser",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate-parsers": "node ./parser-generator/generate-csscolor.js > generated-parsers.js"
+    "generate-parsers": "node ./parser-generator/generate-csscolor.js > src/generated-parsers.js",
+    "benchmark": "node --expose-gc benchmark.js"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "color-string": "^1.5.4",
-    "moo": "^0.5.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "color-parse": "^1.4.2",
-    "regex-compressor": "^1.0.0"
-  }
+    "color-string": "^1.5.4",
+    "csscolorparser": "^1.0.3"
+  },
+  "files": [
+    "src/"
+  ]
 }

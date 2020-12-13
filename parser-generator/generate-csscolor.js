@@ -65,17 +65,14 @@ const fullGrammar = {
     deviceCmyk: {
         regex: 'device-cmyk\\(${w}(${numberOrPercentage})${w}(${numberOrPercentage})${w}(${numberOrPercentage})${w}(${numberOrPercentage})${w}(?:\\/${w}(${numberOrPercentage}(?:${w},${w}(.+?))?)${w})?\\)?',
         groups: ['c:numberOrPercentage', 'm:numberOrPercentage', 'y:numberOrPercentage', 'k:numberOrPercentage', 'alpha:numberOrPercentage', 'fallback']
-    },
-    /*color: {
-        regex: '(transparent)|(${namedColor})|(${hexColor})|(${rgb})|(${hsl})',
-        groups: ['transparent', 'namedColor:namedColor', 'hexColor:hexColor', 'rgb:rgb', 'hsl:hsl']
-    },*/
+    }/*,
     color: {
-        regex: '(${rgb})|(${hsl})',
-        groups: ['rgb:rgb', 'hsl:hsl']
-    }
+        regex: '(transparent)|(${namedColor})|(${hexColor})|(${rgb})|(${hsl})|(${hwb})|(${lab})|(${lch})|(${deviceCmyk})',
+        groups: ['transparent', 'namedColor:namedColor', 'hexColor:hexColor', 'rgb:rgb', 'hsl:hsl', 'hwb:hwb', 'lab:lab', 'lch:lch', 'device-cmyk:device-cmyk']
+    },*/
 };
 
+// Instead of matching on one big regex, split it up into several smaller ones, then decide which to use based on the first few characters.
 const parserDefs = {
     rgbParser: 'rgb',
     hslParser: 'hsl',
@@ -86,15 +83,16 @@ const parserDefs = {
 };
 
 const parsers = {};
-
 for (const [k, v] of Object.entries(parserDefs)) {
     parsers[k] = makeParser(fullGrammar, v, {caseInsensitive: true});
 }
 
+
+// Create a "fast-path" parser with a much stricter definition of a number. This is a ~20% performance improvement.
+// This can't parse things like scientific notation, but for that we can fall back to the slow-path parser.
 fullGrammar.number = '\\d+(?:\\.\\d+)?';
 
 const fastParsers = {};
-
 for (const [k, v] of Object.entries(parserDefs)) {
     fastParsers[k] = makeParser(fullGrammar, v, {caseInsensitive: true});
 }
