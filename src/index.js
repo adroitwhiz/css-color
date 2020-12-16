@@ -103,7 +103,7 @@ const parseCSSColor = (cb, cssStr) => {
         return float < 0 ? 0 : float > 1 ? 1 : float;
     };
 
-    let parseResult, pathMap;
+    let parseResult, relMap;
 
     const parseDecimalOrPercentage = val => {
         if (val.charAt(val.length - 1) === '%') {
@@ -113,22 +113,22 @@ const parseCSSColor = (cb, cssStr) => {
         }
     };
 
-    const parseAlphaValue = pathStart => {
-        if (parseResult[pathMap[`${pathStart}.alpha.percentage`]]) {
-            return percentageToDecimal(parseResult[pathMap[`${pathStart}.alpha.percentage`]]);
-        } else if (parseResult[pathMap[`${pathStart}.alpha.number`]]) {
-            return decimalClamp(Number(parseResult[pathMap[`${pathStart}.alpha.number`]]));
+    const parseAlphaValue = pathOffset => {
+        if (parseResult[pathOffset + relMap['numberOrPercentage.percentage']]) {
+            return percentageToDecimal(parseResult[pathOffset + relMap['numberOrPercentage.percentage']]);
+        } else if (parseResult[pathOffset + relMap['numberOrPercentage.number']]) {
+            return decimalClamp(Number(parseResult[pathOffset + relMap['numberOrPercentage.number']]));
         } else {
             return 1;
         }
     };
 
-    const parseHueValue = huePath => {
+    const parseHueValue = hueOffset => {
         let h;
-        if (parseResult[pathMap[`${huePath}.angle`]]) {
-            const angleValue = parseResult[pathMap[`${huePath}.angle.value`]];
+        if (parseResult[hueOffset + relMap['hue.angle']]) {
+            const angleValue = parseResult[hueOffset + relMap['hue.angle'] + relMap['angle.value']];
 
-            switch (parseResult[pathMap[`${huePath}.angle.unit`]]) {
+            switch (parseResult[hueOffset + relMap['hue.angle'] + relMap['angle.unit']]) {
                 case 'deg':
                     h = Number(angleValue);
                     break;
@@ -143,7 +143,7 @@ const parseCSSColor = (cb, cssStr) => {
                     break;
             }
         } else {
-            h = Number(parseResult[pathMap[`${huePath}.number`]]);
+            h = Number(parseResult[hueOffset + relMap['hue.number']]);
         }
 
         return ((h % 360) + 360) % 360;
@@ -154,26 +154,26 @@ const parseCSSColor = (cb, cssStr) => {
         parseResult = rgbParser.fastRegex.exec(str);
         if (parseResult === null) parseResult = rgbParser.regex.exec(str);
         if (parseResult === null) return cb(null);
-        pathMap = rgbParser.pathMap;
+        relMap = rgbParser.relMap;
 
         let r, g, b;
         let pathStart;
 
-        if (parseResult[pathMap['rgb.rgbPercentage']] || parseResult[pathMap['rgb.rgbPercentageCommas']]) {
-            pathStart = parseResult[pathMap['rgb.rgbPercentage']] ? 'rgb.rgbPercentage' : 'rgb.rgbPercentageCommas';
-            r = percentageToUint8(parseResult[pathMap[`${pathStart}.red`]]);
-            g = percentageToUint8(parseResult[pathMap[`${pathStart}.green`]]);
-            b = percentageToUint8(parseResult[pathMap[`${pathStart}.blue`]]);
-        } else if (parseResult[pathMap['rgb.rgbNumber']] || parseResult[pathMap['rgb.rgbNumberCommas']]) {
-            pathStart = parseResult[pathMap['rgb.rgbNumber']] ? 'rgb.rgbNumber' : 'rgb.rgbNumberCommas';
-            r = floatToUint8(parseResult[pathMap[`${pathStart}.red`]]);
-            g = floatToUint8(parseResult[pathMap[`${pathStart}.green`]]);
-            b = floatToUint8(parseResult[pathMap[`${pathStart}.blue`]]);
+        if (parseResult[relMap['rgb.rgbPercentage']] || parseResult[relMap['rgb.rgbPercentageCommas']]) {
+            pathStart = parseResult[relMap['rgb.rgbPercentage']] ? relMap['rgb.rgbPercentage'] : relMap['rgb.rgbPercentageCommas'];
+            r = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.red']]);
+            g = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.green']]);
+            b = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.blue']]);
+        } else if (parseResult[relMap['rgb.rgbNumber']] || parseResult[relMap['rgb.rgbNumberCommas']]) {
+            pathStart = parseResult[relMap['rgb.rgbNumber']] ? relMap['rgb.rgbNumber'] : relMap['rgb.rgbNumberCommas'];
+            r = floatToUint8(parseResult[pathStart + relMap['rgbNumber.red']]);
+            g = floatToUint8(parseResult[pathStart + relMap['rgbNumber.green']]);
+            b = floatToUint8(parseResult[pathStart + relMap['rgbNumber.blue']]);
         } else {
             return cb(null);
         }
 
-        const a = parseAlphaValue(pathStart);
+        const a = parseAlphaValue(pathStart + relMap['rgbNumber.alpha']);
 
         return cb('rgb', r, g, b, a);
     } else if (/^hsl/i.test(str)) {
@@ -181,13 +181,13 @@ const parseCSSColor = (cb, cssStr) => {
         if (parseResult === null) parseResult = hslParser.regex.exec(str);
         if (parseResult === null) return cb(null);
 
-        pathMap = hslParser.pathMap;
+        relMap = hslParser.relMap;
 
-        const pathStart = parseResult[pathMap['hsl.hslCommas']] ? 'hsl.hslCommas' : 'hsl.hslNoCommas';
-        const h = parseHueValue(pathStart + '.hue');
-        const s = percentageToNumber(parseResult[pathMap[`${pathStart}.saturation`]]);
-        const l = percentageToNumber(parseResult[pathMap[`${pathStart}.lightness`]]);
-        const a = parseAlphaValue(pathStart);
+        const pathStart = parseResult[relMap['hsl.hslCommas']] ? relMap['hsl.hslCommas'] : relMap['hsl.hslNoCommas'];
+        const h = parseHueValue(pathStart + relMap['hslCommas.hue']);
+        const s = percentageToNumber(parseResult[pathStart + relMap['hslCommas.saturation']]);
+        const l = percentageToNumber(parseResult[pathStart + relMap['hslCommas.lightness']]);
+        const a = parseAlphaValue(pathStart + relMap['hslCommas.alpha']);
 
         return cb('hsl', h, s, l, a);
     } else if (/^hwb/i.test(str)) {
@@ -195,12 +195,12 @@ const parseCSSColor = (cb, cssStr) => {
         if (parseResult === null) parseResult = hwbParser.regex.exec(str);
         if (parseResult === null) return cb(null);
 
-        pathMap = hwbParser.pathMap;
+        relMap = hwbParser.relMap;
 
-        const h = parseHueValue('hwb.hue');
-        const w = percentageToNumber(parseResult[pathMap['hwb.whiteness']]);
-        const b = percentageToNumber(parseResult[pathMap['hwb.blackness']]);
-        const a = parseAlphaValue('hwb');
+        const h = parseHueValue(relMap['hwb.hue']);
+        const w = percentageToNumber(parseResult[relMap['hwb.whiteness']]);
+        const b = percentageToNumber(parseResult[relMap['hwb.blackness']]);
+        const a = parseAlphaValue(relMap['hwb.alpha']);
 
         return cb('hwb', h, w, b, a);
     } else if (/^lab/i.test(str)) {
@@ -208,13 +208,13 @@ const parseCSSColor = (cb, cssStr) => {
         if (parseResult === null) parseResult = labParser.regex.exec(str);
         if (parseResult === null) return cb(null);
 
-        pathMap = labParser.pathMap;
+        relMap = labParser.relMap;
 
         // Don't clamp maximum lightness
-        const l = Math.max(0, Number(parseResult[pathMap['lab.lightness']].slice(0, -1)));
-        const a = Number(parseResult[pathMap['lab.a']]);
-        const b = Number(parseResult[pathMap['lab.b']]);
-        const alpha = parseAlphaValue('lab');
+        const l = Math.max(0, Number(parseResult[relMap['lab.lightness']].slice(0, -1)));
+        const a = Number(parseResult[relMap['lab.a']]);
+        const b = Number(parseResult[relMap['lab.b']]);
+        const alpha = parseAlphaValue(relMap['lab.alpha']);
 
         return cb('lab', l, a, b, alpha);
     } else if (/^lch/i.test(str)) {
@@ -222,12 +222,12 @@ const parseCSSColor = (cb, cssStr) => {
         if (parseResult === null) parseResult = lchParser.regex.exec(str);
         if (parseResult === null) return cb(null);
 
-        pathMap = lchParser.pathMap;
+        relMap = lchParser.relMap;
 
-        const l = Math.max(0, Number(parseResult[pathMap['lch.lightness']].slice(0, -1)));
-        const c = Math.max(0, Number(parseResult[pathMap['lch.chroma']]));
-        const h = parseHueValue('lch.hue');
-        const alpha = parseAlphaValue('lch');
+        const l = Math.max(0, Number(parseResult[relMap['lch.lightness']].slice(0, -1)));
+        const c = Math.max(0, Number(parseResult[relMap['lch.chroma']]));
+        const h = parseHueValue(relMap['lch.hue']);
+        const alpha = parseAlphaValue(relMap['lch.alpha']);
 
         return cb('lch', l, c, h, alpha);
     } else if (/^device-cmyk/i.test(str)) {
@@ -235,14 +235,14 @@ const parseCSSColor = (cb, cssStr) => {
         if (parseResult === null) parseResult = deviceCmykParser.regex.exec(str);
         if (parseResult === null) return cb(null);
 
-        pathMap = deviceCmykParser.pathMap;
+        relMap = deviceCmykParser.relMap;
 
-        const c = parseDecimalOrPercentage(parseResult[pathMap['deviceCmyk.c']]) * 100;
-        const m = parseDecimalOrPercentage(parseResult[pathMap['deviceCmyk.m']]) * 100;
-        const y = parseDecimalOrPercentage(parseResult[pathMap['deviceCmyk.y']]) * 100;
-        const k = parseDecimalOrPercentage(parseResult[pathMap['deviceCmyk.k']]) * 100;
-        const alpha = parseAlphaValue('deviceCmyk');
-        const fallback = parseResult[pathMap['deviceCmyk.fallback']] || null;
+        const c = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.c']]) * 100;
+        const m = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.m']]) * 100;
+        const y = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.y']]) * 100;
+        const k = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.k']]) * 100;
+        const alpha = parseAlphaValue(relMap['deviceCmyk.alpha']);
+        const fallback = parseResult[relMap['deviceCmyk.fallback']] || null;
 
         return cb('device-cmyk', c, m, y, k, alpha, fallback);
     }

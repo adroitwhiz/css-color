@@ -99,7 +99,7 @@ for (const [k, v] of Object.entries(parserDefs)) {
 
 const genCodeFromParser = (parser, fastParser) => {
     return `{
-    pathMap: ${JSON.stringify(parser.pathMap)},
+    relMap: ${JSON.stringify(parser.pathMap)},
     regex: ${parser.regex.toString()},
     fastRegex: ${fastParser.regex.toString()}
 }`;

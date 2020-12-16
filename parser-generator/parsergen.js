@@ -27,32 +27,38 @@ const makeParser = (grammar, root, opts) => {
 
     const compiledRegex = new RegExp(`^(?:${compileRule(root, root)})$`, opts && opts.caseInsensitive ? 'i' : '');
 
-    const paths = [];
-    const compileGroupPaths = (ruleName, path) => {
+    const pathsRelative = {[root]: 0};
+    const visitedRules = new Map();
+    const compileRelativePaths = (ruleName, path) => {
         const rule = grammar[ruleName];
+        if (visitedRules.has(ruleName)) return visitedRules.get(ruleName);
 
-        if (typeof rule !== 'object') return;
+        if (typeof rule !== 'object') return 0;
 
+        let offset = 1;
+        let subgroupLengths = 0;
         for (const group of rule.groups) {
             const [groupName, groupType] = group.split(':');
 
-            paths.push(path + '.' + groupName);
+            pathsRelative[ruleName + '.' + groupName] = offset;
+            offset++;
 
             if (groupType) {
-                compileGroupPaths(groupType, path + '.' + groupName);
+                const numInnerGroups = compileRelativePaths(groupType, path + '.' + groupName);
+                offset += numInnerGroups;
+                subgroupLengths += numInnerGroups;
             }
         }
-    };
-    compileGroupPaths(root, root);
 
-    const pathMap = {};
-    for (let i = 0; i < paths.length; i++) {
-        pathMap[paths[i]] = i + 1;
-    }
+        const numGroups = rule.groups.length + subgroupLengths;
+        visitedRules.set(ruleName, numGroups);
+        return numGroups;
+    };
+    compileRelativePaths(root, root);
 
     return {
         exec: compiledRegex.exec.bind(compiledRegex),
-        pathMap,
+        pathMap: pathsRelative,
         regex: compiledRegex
     };
 };
