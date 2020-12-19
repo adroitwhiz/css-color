@@ -113,7 +113,7 @@ npm run benchmark
 # To run a specific benchmark
 npm run benchmark -- <hex, rgb, hsl, hwb, keywords>
 ```
-Currently, this parser is slower than many others, though considering those other parsers are much more limited in what they can parse, it's not a very meaningful comparison.
+Note that as many other parsers are much more limited in what they can parse (and parse failures are often much faster), the results should be taken with a grain of salt.
 
 ## Limitations
 
