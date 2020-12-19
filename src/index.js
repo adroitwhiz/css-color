@@ -150,103 +150,118 @@ const parseCSSColor = (cb, cssStr) => {
     };
 
     // Regex-based parsing
-    if (/^rgb/i.test(str)) {
-        parseResult = rgbParser.fastRegex.exec(str);
-        if (parseResult === null) parseResult = rgbParser.regex.exec(str);
-        if (parseResult === null) return cb(null);
-        relMap = rgbParser.relMap;
+    const parenSyntax = /^(rgb|hsl|hwb|lab|lch|device-cmyk)/i.exec(str);
+    if (parenSyntax) {
+        switch (parenSyntax[1].toLowerCase()) {
+            case 'rgb': {
+                parseResult = rgbParser.fastRegex.exec(str);
+                if (parseResult === null) parseResult = rgbParser.regex.exec(str);
+                if (parseResult === null) return cb(null);
+                relMap = rgbParser.relMap;
 
-        let r, g, b;
-        let pathStart;
+                let r, g, b;
+                let pathStart;
 
-        if (parseResult[relMap['rgb.rgbPercentage']]) {
-            pathStart = relMap['rgb.rgbPercentage'];
-            pathStart += parseResult[pathStart + relMap['rgbPercentage|commas']] ? relMap['rgbPercentage|commas'] : relMap['rgbPercentage|spaces'];
-            r = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.red']]);
-            g = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.green']]);
-            b = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.blue']]);
-        } else if (parseResult[relMap['rgb.rgbNumber']]) {
-            pathStart = relMap['rgb.rgbNumber'];
-            pathStart += parseResult[pathStart + relMap['rgbNumber|commas']] ? relMap['rgbNumber|commas'] : relMap['rgbNumber|spaces'];
-            r = floatToUint8(parseResult[pathStart + relMap['rgbNumber.red']]);
-            g = floatToUint8(parseResult[pathStart + relMap['rgbNumber.green']]);
-            b = floatToUint8(parseResult[pathStart + relMap['rgbNumber.blue']]);
-        } else {
-            return cb(null);
+                if (parseResult[relMap['rgb.rgbPercentage']]) {
+                    pathStart = relMap['rgb.rgbPercentage'];
+                    pathStart += parseResult[pathStart + relMap['rgbPercentage|commas']] ? relMap['rgbPercentage|commas'] : relMap['rgbPercentage|spaces'];
+                    r = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.red']]);
+                    g = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.green']]);
+                    b = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.blue']]);
+                } else if (parseResult[relMap['rgb.rgbNumber']]) {
+                    pathStart = relMap['rgb.rgbNumber'];
+                    pathStart += parseResult[pathStart + relMap['rgbNumber|commas']] ? relMap['rgbNumber|commas'] : relMap['rgbNumber|spaces'];
+                    r = floatToUint8(parseResult[pathStart + relMap['rgbNumber.red']]);
+                    g = floatToUint8(parseResult[pathStart + relMap['rgbNumber.green']]);
+                    b = floatToUint8(parseResult[pathStart + relMap['rgbNumber.blue']]);
+                } else {
+                    return cb(null);
+                }
+
+                const a = parseAlphaValue(pathStart + relMap['rgbNumber.alpha']);
+
+                return cb('rgb', r, g, b, a);
+            }
+
+            case 'hsl': {
+                parseResult = hslParser.fastRegex.exec(str);
+                if (parseResult === null) parseResult = hslParser.regex.exec(str);
+                if (parseResult === null) return cb(null);
+
+                relMap = hslParser.relMap;
+
+                const pathStart = parseResult[relMap['hsl|commas']] ? relMap['hsl|commas'] : relMap['hsl|spaces'];
+                const h = parseHueValue(pathStart + relMap['hsl.hue']);
+                const s = percentageToNumber(parseResult[pathStart + relMap['hsl.saturation']]);
+                const l = percentageToNumber(parseResult[pathStart + relMap['hsl.lightness']]);
+                const a = parseAlphaValue(pathStart + relMap['hsl.alpha']);
+
+                return cb('hsl', h, s, l, a);
+            }
+
+            case 'hwb': {
+                parseResult = hwbParser.fastRegex.exec(str);
+                if (parseResult === null) parseResult = hwbParser.regex.exec(str);
+                if (parseResult === null) return cb(null);
+
+                relMap = hwbParser.relMap;
+
+                const h = parseHueValue(relMap['hwb.hue']);
+                const w = percentageToNumber(parseResult[relMap['hwb.whiteness']]);
+                const b = percentageToNumber(parseResult[relMap['hwb.blackness']]);
+                const a = parseAlphaValue(relMap['hwb.alpha']);
+
+                return cb('hwb', h, w, b, a);
+            }
+
+            case 'lab': {
+                parseResult = labParser.fastRegex.exec(str);
+                if (parseResult === null) parseResult = labParser.regex.exec(str);
+                if (parseResult === null) return cb(null);
+
+                relMap = labParser.relMap;
+
+                // Don't clamp maximum lightness
+                const l = Math.max(0, Number(parseResult[relMap['lab.lightness']].slice(0, -1)));
+                const a = Number(parseResult[relMap['lab.a']]);
+                const b = Number(parseResult[relMap['lab.b']]);
+                const alpha = parseAlphaValue(relMap['lab.alpha']);
+
+                return cb('lab', l, a, b, alpha);
+            }
+
+            case 'lch': {
+                parseResult = lchParser.fastRegex.exec(str);
+                if (parseResult === null) parseResult = lchParser.regex.exec(str);
+                if (parseResult === null) return cb(null);
+
+                relMap = lchParser.relMap;
+
+                const l = Math.max(0, Number(parseResult[relMap['lch.lightness']].slice(0, -1)));
+                const c = Math.max(0, Number(parseResult[relMap['lch.chroma']]));
+                const h = parseHueValue(relMap['lch.hue']);
+                const alpha = parseAlphaValue(relMap['lch.alpha']);
+
+                return cb('lch', l, c, h, alpha);
+            }
+
+            case 'device-cmyk': {
+                parseResult = deviceCmykParser.fastRegex.exec(str);
+                if (parseResult === null) parseResult = deviceCmykParser.regex.exec(str);
+                if (parseResult === null) return cb(null);
+
+                relMap = deviceCmykParser.relMap;
+
+                const c = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.c']]) * 100;
+                const m = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.m']]) * 100;
+                const y = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.y']]) * 100;
+                const k = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.k']]) * 100;
+                const alpha = parseAlphaValue(relMap['deviceCmyk.alpha']);
+                const fallback = parseResult[relMap['deviceCmyk.fallback']] || null;
+
+                return cb('device-cmyk', c, m, y, k, alpha, fallback);
+            }
         }
-
-        const a = parseAlphaValue(pathStart + relMap['rgbNumber.alpha']);
-
-        return cb('rgb', r, g, b, a);
-    } else if (/^hsl/i.test(str)) {
-        parseResult = hslParser.fastRegex.exec(str);
-        if (parseResult === null) parseResult = hslParser.regex.exec(str);
-        if (parseResult === null) return cb(null);
-
-        relMap = hslParser.relMap;
-
-        const pathStart = parseResult[relMap['hsl|commas']] ? relMap['hsl|commas'] : relMap['hsl|spaces'];
-        const h = parseHueValue(pathStart + relMap['hsl.hue']);
-        const s = percentageToNumber(parseResult[pathStart + relMap['hsl.saturation']]);
-        const l = percentageToNumber(parseResult[pathStart + relMap['hsl.lightness']]);
-        const a = parseAlphaValue(pathStart + relMap['hsl.alpha']);
-
-        return cb('hsl', h, s, l, a);
-    } else if (/^hwb/i.test(str)) {
-        parseResult = hwbParser.fastRegex.exec(str);
-        if (parseResult === null) parseResult = hwbParser.regex.exec(str);
-        if (parseResult === null) return cb(null);
-
-        relMap = hwbParser.relMap;
-
-        const h = parseHueValue(relMap['hwb.hue']);
-        const w = percentageToNumber(parseResult[relMap['hwb.whiteness']]);
-        const b = percentageToNumber(parseResult[relMap['hwb.blackness']]);
-        const a = parseAlphaValue(relMap['hwb.alpha']);
-
-        return cb('hwb', h, w, b, a);
-    } else if (/^lab/i.test(str)) {
-        parseResult = labParser.fastRegex.exec(str);
-        if (parseResult === null) parseResult = labParser.regex.exec(str);
-        if (parseResult === null) return cb(null);
-
-        relMap = labParser.relMap;
-
-        // Don't clamp maximum lightness
-        const l = Math.max(0, Number(parseResult[relMap['lab.lightness']].slice(0, -1)));
-        const a = Number(parseResult[relMap['lab.a']]);
-        const b = Number(parseResult[relMap['lab.b']]);
-        const alpha = parseAlphaValue(relMap['lab.alpha']);
-
-        return cb('lab', l, a, b, alpha);
-    } else if (/^lch/i.test(str)) {
-        parseResult = lchParser.fastRegex.exec(str);
-        if (parseResult === null) parseResult = lchParser.regex.exec(str);
-        if (parseResult === null) return cb(null);
-
-        relMap = lchParser.relMap;
-
-        const l = Math.max(0, Number(parseResult[relMap['lch.lightness']].slice(0, -1)));
-        const c = Math.max(0, Number(parseResult[relMap['lch.chroma']]));
-        const h = parseHueValue(relMap['lch.hue']);
-        const alpha = parseAlphaValue(relMap['lch.alpha']);
-
-        return cb('lch', l, c, h, alpha);
-    } else if (/^device-cmyk/i.test(str)) {
-        parseResult = deviceCmykParser.fastRegex.exec(str);
-        if (parseResult === null) parseResult = deviceCmykParser.regex.exec(str);
-        if (parseResult === null) return cb(null);
-
-        relMap = deviceCmykParser.relMap;
-
-        const c = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.c']]) * 100;
-        const m = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.m']]) * 100;
-        const y = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.y']]) * 100;
-        const k = parseDecimalOrPercentage(parseResult[relMap['deviceCmyk.k']]) * 100;
-        const alpha = parseAlphaValue(relMap['deviceCmyk.alpha']);
-        const fallback = parseResult[relMap['deviceCmyk.fallback']] || null;
-
-        return cb('device-cmyk', c, m, y, k, alpha, fallback);
     }
 
     // Color keyword parsing/lookup
