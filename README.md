@@ -1,6 +1,6 @@
 # css-color-parser
 
-`css-color-parser` is a CSS Color Module Level 4-compliant CSS color value parser. Its goal is to parse any color values defined in the CSS Color Module Level 4, and to refuse to parse any other values. This is to ensure complete consistency with, for instance, web browsers. In comparison, most other JS color parsers both fail to parse color values that browsers will accept, and succeed in parsing bogus values that browsers will ignore.
+`css-color-parser` is a CSS Color Module Level 4-compliant CSS color value parser. Its goal is to parse any color values defined in the CSS Color Module Level 4, and to refuse to parse any other values. This is to ensure complete consistency with, for instance, web browsers. In comparison, most other JS color parsers both fail to parse color values that browsers will accept, and succeed in parsing bogus values that browsers will ignore. I've also created an extensive [test suite](https://github.com/adroitwhiz/css-color-parser-test-suite) for CSS color parsers, which includes many of the edge cases that other parsers currently fail on.
 
 This library doesn't include any color conversion functionality--it is solely focused on parsing.
 
