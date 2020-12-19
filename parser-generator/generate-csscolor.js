@@ -19,36 +19,29 @@ const fullGrammar = {
     },
     w: '\\s*',
     rgbPercentage: {
-        regex: 'rgba?\\(${w}(${percentage})${w}(${percentage})${w}(${percentage})${w}(?:\\/${w}(${numberOrPercentage})${w})?\\)?',
+        regex: {
+            spaces: 'rgba?\\(${w}(${percentage})${w}(${percentage})${w}(${percentage})${w}(?:\\/${w}(${numberOrPercentage})${w})?\\)?',
+            commas: 'rgba?\\(${w}(${percentage})${w},${w}(${percentage})${w},${w}(${percentage})${w}(?:,${w}(${numberOrPercentage})${w})?\\)?'
+        },
         groups: ['red:percentage', 'green:percentage', 'blue:percentage', 'alpha:numberOrPercentage']
     },
     rgbNumber: {
-        regex: 'rgba?\\(${w}(${number})${w}(${number})${w}(${number})${w}(?:\\/${w}(${numberOrPercentage}))?${w}\\)?',
+        regex: {
+            spaces: 'rgba?\\(${w}(${number})${w}(${number})${w}(${number})${w}(?:\\/${w}(${numberOrPercentage}))?${w}\\)?',
+            commas: 'rgba?\\(${w}(${number})${w},${w}(${number})${w},${w}(${number})${w}(?:,${w}(${numberOrPercentage})${w})?\\)?'
+        },
         groups: ['red:number', 'green:number', 'blue:number', 'alpha:numberOrPercentage']
     },
-    rgbPercentageCommas: {
-        regex: 'rgba?\\(${w}(${percentage})${w},${w}(${percentage})${w},${w}(${percentage})${w}(?:,${w}(${numberOrPercentage})${w})?\\)?',
-        groups: ['red:percentage', 'green:percentage', 'blue:percentage', 'alpha:numberOrPercentage']
-    },
-    rgbNumberCommas: {
-        regex: 'rgba?\\(${w}(${number})${w},${w}(${number})${w},${w}(${number})${w}(?:,${w}(${numberOrPercentage})${w})?\\)?',
-        groups: ['red:number', 'green:number', 'blue:number', 'alpha:numberOrPercentage']
-    },
-    hslNoCommas: {
-        regex: 'hsla?\\(${w}(${hue})${w}(${percentage})${w}(${percentage})${w}(?:\\/${w}(${numberOrPercentage})${w})?\\)?',
-        groups: ['hue:hue', 'saturation:percentage', 'lightness:percentage', 'alpha:numberOrPercentage']
-    },
-    hslCommas: {
-        regex: 'hsla?\\(${w}(${hue})${w},${w}(${percentage})${w},${w}(${percentage})${w}(?:,${w}(${numberOrPercentage})${w})?\\)?',
+    hsl: {
+        regex: {
+            spaces: 'hsla?\\(${w}(${hue})${w}(${percentage})${w}(${percentage})${w}(?:\\/${w}(${numberOrPercentage})${w})?\\)?',
+            commas: 'hsla?\\(${w}(${hue})${w},${w}(${percentage})${w},${w}(${percentage})${w}(?:,${w}(${numberOrPercentage})${w})?\\)?',
+        },
         groups: ['hue:hue', 'saturation:percentage', 'lightness:percentage', 'alpha:numberOrPercentage']
     },
     rgb: {
-        regex: '(${rgbPercentage})|(${rgbNumber})|(${rgbPercentageCommas})|(${rgbNumberCommas})',
-        groups: ['rgbPercentage:rgbPercentage', 'rgbNumber:rgbNumber', 'rgbPercentageCommas:rgbPercentageCommas', 'rgbNumberCommas:rgbNumberCommas']
-    },
-    hsl: {
-        regex: '(${hslCommas})|(${hslNoCommas})',
-        groups: ['hslCommas:hslCommas', 'hslNoCommas:hslNoCommas']
+        regex: '(${rgbPercentage})|(${rgbNumber})',
+        groups: ['rgbPercentage:rgbPercentage', 'rgbNumber:rgbNumber']
     },
     hwb: {
         regex: 'hwb\\(${w}(${hue})${w}(${percentage})${w}(${percentage})${w}(?:\\/${w}(${numberOrPercentage})${w})?\\)?',

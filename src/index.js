@@ -159,13 +159,15 @@ const parseCSSColor = (cb, cssStr) => {
         let r, g, b;
         let pathStart;
 
-        if (parseResult[relMap['rgb.rgbPercentage']] || parseResult[relMap['rgb.rgbPercentageCommas']]) {
-            pathStart = parseResult[relMap['rgb.rgbPercentage']] ? relMap['rgb.rgbPercentage'] : relMap['rgb.rgbPercentageCommas'];
+        if (parseResult[relMap['rgb.rgbPercentage']]) {
+            pathStart = relMap['rgb.rgbPercentage'];
+            pathStart += parseResult[pathStart + relMap['rgbPercentage|commas']] ? relMap['rgbPercentage|commas'] : relMap['rgbPercentage|spaces'];
             r = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.red']]);
             g = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.green']]);
             b = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.blue']]);
-        } else if (parseResult[relMap['rgb.rgbNumber']] || parseResult[relMap['rgb.rgbNumberCommas']]) {
-            pathStart = parseResult[relMap['rgb.rgbNumber']] ? relMap['rgb.rgbNumber'] : relMap['rgb.rgbNumberCommas'];
+        } else if (parseResult[relMap['rgb.rgbNumber']]) {
+            pathStart = relMap['rgb.rgbNumber'];
+            pathStart += parseResult[pathStart + relMap['rgbNumber|commas']] ? relMap['rgbNumber|commas'] : relMap['rgbNumber|spaces'];
             r = floatToUint8(parseResult[pathStart + relMap['rgbNumber.red']]);
             g = floatToUint8(parseResult[pathStart + relMap['rgbNumber.green']]);
             b = floatToUint8(parseResult[pathStart + relMap['rgbNumber.blue']]);
@@ -183,11 +185,11 @@ const parseCSSColor = (cb, cssStr) => {
 
         relMap = hslParser.relMap;
 
-        const pathStart = parseResult[relMap['hsl.hslCommas']] ? relMap['hsl.hslCommas'] : relMap['hsl.hslNoCommas'];
-        const h = parseHueValue(pathStart + relMap['hslCommas.hue']);
-        const s = percentageToNumber(parseResult[pathStart + relMap['hslCommas.saturation']]);
-        const l = percentageToNumber(parseResult[pathStart + relMap['hslCommas.lightness']]);
-        const a = parseAlphaValue(pathStart + relMap['hslCommas.alpha']);
+        const pathStart = parseResult[relMap['hsl|commas']] ? relMap['hsl|commas'] : relMap['hsl|spaces'];
+        const h = parseHueValue(pathStart + relMap['hsl.hue']);
+        const s = percentageToNumber(parseResult[pathStart + relMap['hsl.saturation']]);
+        const l = percentageToNumber(parseResult[pathStart + relMap['hsl.lightness']]);
+        const a = parseAlphaValue(pathStart + relMap['hsl.alpha']);
 
         return cb('hsl', h, s, l, a);
     } else if (/^hwb/i.test(str)) {

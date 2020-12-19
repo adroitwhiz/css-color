@@ -7,9 +7,19 @@ const makeParser = (grammar, root, opts) => {
         const rule = grammar[ruleName];
 
         let ruleText;
+        let isSingleRule = true;
         switch (typeof rule) {
             case 'object':
-                ruleText = rule.regex;
+                switch (typeof rule.regex) {
+                    case 'string':
+                        ruleText = rule.regex;
+                        break;
+                    case 'object':
+                        ruleText = Object.values(rule.regex);
+                        isSingleRule = false;
+                        break;
+                }
+
                 break;
             case 'string':
                 ruleText = rule;
@@ -20,12 +30,16 @@ const makeParser = (grammar, root, opts) => {
 
         const templateRegex = /\${(.+?)}/g;
 
-        return ruleText.replace(templateRegex, (match, ref) => {
-            return `(?:${compileRule(ref, depth + 1)})`;
+        const compileSingle = singleRegex => singleRegex.replace(templateRegex, (match, ref) => {
+            return compileRule(ref, depth + 1);
         });
+
+        return isSingleRule ? `(?:${compileSingle(ruleText)})` : `(?:${ruleText.map(singleRegex => {
+            return `(${compileSingle(singleRegex)})`;
+        }).join('|')})`;
     };
 
-    const compiledRegex = new RegExp(`^(?:${compileRule(root, root)})$`, opts && opts.caseInsensitive ? 'i' : '');
+    const compiledRegex = new RegExp(`^${compileRule(root, root)}$`, opts && opts.caseInsensitive ? 'i' : '');
 
     const pathsRelative = {[root]: 0};
     const visitedRules = new Map();
@@ -49,8 +63,17 @@ const makeParser = (grammar, root, opts) => {
                 subgroupLengths += numInnerGroups;
             }
         }
+        let numGroups = rule.groups.length + subgroupLengths;
+        if (typeof rule.regex === 'object') {
+            let i = 0;
+            const keys = Object.keys(rule.regex);
+            for (const regexName of keys) {
+                pathsRelative[ruleName + '|' + regexName] = (offset * i++) + 1;
+            }
 
-        const numGroups = rule.groups.length + subgroupLengths;
+            numGroups = (numGroups + 1) * keys.length;
+        }
+
         visitedRules.set(ruleName, numGroups);
         return numGroups;
     };
