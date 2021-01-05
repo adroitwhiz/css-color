@@ -79,8 +79,8 @@ const parseCSSColor = (cb, cssStr) => {
         return cb('hex', r, g, b, a / 255);
     }
 
-    const percentageToUint8 = percentage => {
-        const unclamped = Math.round(Number(percentage.slice(0, -1)) * 255 / 100);
+    const percentageToRange255 = percentage => {
+        const unclamped = Number(percentage.slice(0, -1)) * 255 / 100;
         return unclamped < 0 ? 0 : unclamped > 255 ? 255 : unclamped;
     };
 
@@ -94,8 +94,8 @@ const parseCSSColor = (cb, cssStr) => {
         return unclamped < 0 ? 0 : unclamped > 1 ? 1 : unclamped;
     };
 
-    const floatToUint8 = float => {
-        const unclamped = Math.round(parseFloat(float));
+    const floatToRange255 = float => {
+        const unclamped = parseFloat(float);
         return unclamped < 0 ? 0 : unclamped > 255 ? 255 : unclamped;
     };
 
@@ -165,15 +165,15 @@ const parseCSSColor = (cb, cssStr) => {
                 if (parseResult[relMap['rgb.rgbPercentage']]) {
                     pathStart = relMap['rgb.rgbPercentage'];
                     pathStart += parseResult[pathStart + relMap['rgbPercentage|commas']] ? relMap['rgbPercentage|commas'] : relMap['rgbPercentage|spaces'];
-                    r = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.red']]);
-                    g = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.green']]);
-                    b = percentageToUint8(parseResult[pathStart + relMap['rgbPercentage.blue']]);
+                    r = percentageToRange255(parseResult[pathStart + relMap['rgbPercentage.red']]);
+                    g = percentageToRange255(parseResult[pathStart + relMap['rgbPercentage.green']]);
+                    b = percentageToRange255(parseResult[pathStart + relMap['rgbPercentage.blue']]);
                 } else if (parseResult[relMap['rgb.rgbNumber']]) {
                     pathStart = relMap['rgb.rgbNumber'];
                     pathStart += parseResult[pathStart + relMap['rgbNumber|commas']] ? relMap['rgbNumber|commas'] : relMap['rgbNumber|spaces'];
-                    r = floatToUint8(parseResult[pathStart + relMap['rgbNumber.red']]);
-                    g = floatToUint8(parseResult[pathStart + relMap['rgbNumber.green']]);
-                    b = floatToUint8(parseResult[pathStart + relMap['rgbNumber.blue']]);
+                    r = floatToRange255(parseResult[pathStart + relMap['rgbNumber.red']]);
+                    g = floatToRange255(parseResult[pathStart + relMap['rgbNumber.green']]);
+                    b = floatToRange255(parseResult[pathStart + relMap['rgbNumber.blue']]);
                 } else {
                     return cb(null);
                 }

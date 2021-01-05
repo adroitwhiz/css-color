@@ -22,7 +22,7 @@ The first argument passed to the callback is the type of color, one of `rgb`, `h
 
 The next 3 arguments (or 4 if the color is of type `device-cmyk`) are the color channel values.
 
-The red, green, and blue channel values (passed in that order for `rgb`, `hex`, and `keyword`) are all numbers (though not necessarily integers) that range from 0 to 255.
+The red, green, and blue channel values (passed in that order for `rgb`, `hex`, and `keyword`) are all numbers (though not necessarily integers--percentage color values, for instance, usually don't map to integers) that range from 0 to 255.
 
 The hue channel value, the first one passed for both `hsl` and `hwb` and the last one passed for `lch`, is a number that ranges from 0 to 360.
 
