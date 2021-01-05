@@ -119,3 +119,4 @@ Note that as many other parsers are much more limited in what they can parse (an
 
 - The `color()` function syntax is currently not supported.
 - `currentcolor` is currently not supported.
+- System colors are currently not supported.
