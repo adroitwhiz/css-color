@@ -18,11 +18,11 @@ The parser function takes two arguments, a callback which is passed the parsed c
 
 If the color could not be successfully parsed, the callback will be called with `null` as its only argument. Otherwise:
 
-The first argument passed to the callback is the type of color, one of `rgb`, `hsl`, `hwb`, `lab`, `lch`, or `device-cmyk`. Hex colors and named colors are converted to `rgb`.
+The first argument passed to the callback is the type of color, one of `rgb`, `hex`, `keyword`, `hsl`, `hwb`, `lab`, `lch`, or `device-cmyk`.
 
 The next 3 arguments (or 4 if the color is of type `device-cmyk`) are the color channel values.
 
-The red, green, and blue channel values (passed in that order) are all numbers (though not necessarily integers) that range from 0 to 255.
+The red, green, and blue channel values (passed in that order for `rgb`, `hex`, and `keyword`) are all numbers (though not necessarily integers) that range from 0 to 255.
 
 The hue channel value, the first one passed for both `hsl` and `hwb` and the last one passed for `lch`, is a number that ranges from 0 to 360.
 

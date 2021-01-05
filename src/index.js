@@ -76,7 +76,7 @@ const parseCSSColor = (cb, cssStr) => {
             default:
                 return cb(null);
         }
-        return cb('rgb', r, g, b, a / 255);
+        return cb('hex', r, g, b, a / 255);
     }
 
     const percentageToUint8 = percentage => {
@@ -267,7 +267,7 @@ const parseCSSColor = (cb, cssStr) => {
     // Color keyword parsing/lookup
     let colorKeywordValue = colorNames[str];
     if (!colorKeywordValue) colorKeywordValue = colorNames[str.toLowerCase()];
-    if (colorKeywordValue) return cb('rgb', ...colorKeywordValue);
+    if (colorKeywordValue) return cb('keyword',  ...colorKeywordValue);
 
     return cb(null);
 };
