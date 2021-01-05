@@ -1,7 +1,7 @@
 {
   "name": "css-color",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "CSS Color Module Level 4-compliant color parser",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
