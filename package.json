@@ -4,17 +4,24 @@
   "description": "CSS Color Module Level 4-compliant color parser",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --ui tdd",
+    "coverage": "nyc npm run test",
     "generate-parsers": "node ./parser-generator/generate-csscolor.js > src/generated-parsers.js",
-    "benchmark": "node --expose-gc benchmark.js"
+    "benchmark": "node --expose-gc benchmark.js",
+    "lint": "eslint . --ext js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-almost": "^1.0.1",
     "color-parse": "^1.4.2",
     "color-string": "^1.5.4",
-    "csscolorparser": "^1.0.3"
+    "csscolorparser": "^1.0.3",
+    "eslint": "^7.17.0",
+    "mocha": "^8.2.1",
+    "nyc": "^15.1.0"
   },
   "files": [
     "src/"

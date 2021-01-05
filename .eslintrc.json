@@ -18,5 +18,12 @@
         "no-constant-condition": ["error", {"checkLoops": false}],
         "prefer-const": "error"
     },
-    "ignorePatterns": ["vendor-bench/"]
+    "overrides": [
+        {
+            "files": ["test/*.js"],
+            "env": {
+                "mocha": true
+            }
+        }
+    ]
 }
