@@ -1,5 +1,5 @@
 {
-  "name": "css-color-parser",
+  "name": "css-color",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.js",
@@ -18,5 +18,15 @@
   },
   "files": [
     "src/"
+  ],
+  "keywords": [
+    "color",
+    "colour",
+    "css",
+    "rgb",
+    "hsl",
+    "parse",
+    "parser",
+    "css-color"
   ]
 }

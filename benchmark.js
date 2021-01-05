@@ -39,13 +39,13 @@ const benchHex = () => {
     }
     out1 = [];
     global.gc();
-    console.time('Hex (css-color-parser)');
+    console.time('Hex (css-color)');
     for (let i = 0; i < hexColors.length; i++) {
         parseCSSColor((model, c1, c2, c3, a) => {
             out1.push([c1, c2, c3, a]);
         }, hexColors[i]);
     }
-    console.timeEnd('Hex (css-color-parser)');
+    console.timeEnd('Hex (css-color)');
 
     out1 = [];
     // Warm up
@@ -127,13 +127,13 @@ const benchRgba = () => {
     }
     out1 = [];
     global.gc();
-    console.time('rgba (css-color-parser)');
+    console.time('rgba (css-color)');
     for (let i = 0; i < rgbaColors.length; i++) {
         parseCSSColor((model, c1, c2, c3, a) => {
             out1.push([c1, c2, c3, a]);
         }, rgbaColors[i]);
     }
-    console.timeEnd('rgba (css-color-parser)');
+    console.timeEnd('rgba (css-color)');
 
     out1 = [];
     // Warm up
@@ -216,13 +216,13 @@ const benchHsla = () => {
     }
     out1 = [];
     global.gc();
-    console.time('hsla (css-color-parser)');
+    console.time('hsla (css-color)');
     for (let i = 0; i < colors.length; i++) {
         parseCSSColor((model, c1, c2, c3, a) => {
             out1.push([c1, c2, c3, a]);
         }, colors[i]);
     }
-    console.timeEnd('hsla (css-color-parser)');
+    console.timeEnd('hsla (css-color)');
 
     out1 = [];
     // Warm up
@@ -287,13 +287,13 @@ const benchHwb = () => {
     }
     out1 = [];
     global.gc();
-    console.time('hwb (css-color-parser)');
+    console.time('hwb (css-color)');
     for (let i = 0; i < colors.length; i++) {
         parseCSSColor((model, c1, c2, c3, a) => {
             out1.push([c1, c2, c3, a]);
         }, colors[i]);
     }
-    console.timeEnd('hwb (css-color-parser)');
+    console.timeEnd('hwb (css-color)');
 
     out1 = [];
     // Warm up
@@ -362,13 +362,13 @@ const benchKeywords = () => {
     }
     out1 = [];
     global.gc();
-    console.time('keywords (css-color-parser)');
+    console.time('keywords (css-color)');
     for (let i = 0; i < colors.length; i++) {
         parseCSSColor((model, c1, c2, c3, a) => {
             out1.push([c1, c2, c3, a]);
         }, colors[i]);
     }
-    console.timeEnd('keywords (css-color-parser)');
+    console.timeEnd('keywords (css-color)');
 
     out1 = [];
     // Warm up
